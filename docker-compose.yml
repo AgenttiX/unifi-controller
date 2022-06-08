@@ -2,7 +2,7 @@ version: "3.8"
 services:
   unifi-controller:
     image: lscr.io/linuxserver/unifi-controller:latest
-    container_name: unifi-controller
+    container_name: unifi_controller
     environment:
       - PUID=1000
       - PGID=1000
@@ -11,13 +11,27 @@ services:
     volumes:
       - ./config:/config
     ports:
-      - 8443:8443
-      - 3478:3478/udp
-      - 10001:10001/udp
-      - 8080:8080
-      - 1900:1900/udp #optional
-      - 8843:8843 #optional
-      - 8880:8880 #optional
-      - 6789:6789 #optional
-      - 5514:5514/udp #optional
+      - 8443:8443  # Management UI
+      - 3478:3478/udp  # Unifi STUN
+      - 10001:10001/udp  # AP discovery
+      - 8080:8080  # Device communication
+      - 1900:1900/udp  # Optional, for making controller discoverable on L2 network
+      - 8843:8843  # Optional, Unifi guest portal HTTPS redirect
+      - 8880:8880  # Optional, Unifi guest portal HTTP redirect
+      - 6789:6789  # Optional, mobile throughput test
+      - 5514:5514/udp  # Optional, remote syslog port
+    labels:
+      - "com.centurylinklabs.watchtower.scope=unifi"
+    restart: unless-stopped
+  watchtower:
+    container_name: unifi_watchtower
+    hostname: watchtower
+    image: containrrr/watchtower:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+    # Run once a week on Sunday at 04:00
+    command: --cleanup --schedule "0 0 4 * * 0" --scope unifi
+    labels:
+      - "com.centurylinklabs.watchtower.scope=unifi"
     restart: unless-stopped
