@@ -28,8 +28,8 @@ services:
     hostname: watchtower
     image: containrrr/watchtower:latest
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     # Run once a week on Sunday at 04:00
     command: --cleanup --schedule "0 0 4 * * 0" --scope unifi
     labels:
